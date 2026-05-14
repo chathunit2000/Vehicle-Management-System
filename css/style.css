@@ -1,0 +1,25 @@
+.submenu {
+    display: none;
+    list-style: none;
+    padding-left: 15px;
+}
+
+.submenu.inner {
+    padding-left: 20px;
+}
+
+.sidebar-sublink {
+    display: block;
+    padding: 5px;
+    color: #ccc;
+    text-decoration: none;
+}
+
+.sidebar-sublink:hover {
+    color: #fff;
+}
+
+.arrow {
+    float: right;
+    font-size: 12px;
+}

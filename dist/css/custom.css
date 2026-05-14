@@ -1,0 +1,23 @@
+#loadingSpinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+    }
+
+ .sidebar-item.selected {
+            background-color: #f8f9fa !important;
+            border-radius: 4px;
+            margin: 2px 0;
+        }
+
+        .sidebar-item.selected .sidebar-link {
+            background-color: #e9ecef !important;
+            color: #495057 !important;
+            font-weight: 500;
+        }
+
+        .sidebar-item.selected .sidebar-link:hover {
+            background-color: #dee2e6 !important;
+        }
