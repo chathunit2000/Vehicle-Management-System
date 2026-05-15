@@ -1,40 +1,41 @@
 <?php
 include '../database/db.php';
+include '../Model/FuelTypeModel.php';
 
 $database = new Database();
-$conn     = $database->connect();
+$conn = $database->connect();
+$model = new FuelTypeModel($conn);
 
 $success = '';
 $error   = '';
 
-if (isset($_POST['add_tax'])) {
+if (isset($_POST['add_fuel_type'])) {
     $description = trim($_POST['description']);
     if (!empty($description)) {
-        $stmt = $conn->prepare("INSERT INTO TAXATION_CLASS (description) VALUES (:description)");
-        $stmt->bindParam(":description", $description);
-        if ($stmt->execute()) {
-            $success = "Taxation class added successfully.";
+        if ($model->addFuelType($description)) {
+            $success = "Fuel type added successfully.";
         } else {
-            $error = "Failed to add taxation class.";
+            $error = "Failed to add fuel type.";
         }
     } else {
-        $error = "Taxation class cannot be empty.";
+        $error = "Fuel type cannot be empty.";
     }
 }
 
-$stmt = $conn->prepare("SELECT * FROM TAXATION_CLASS ORDER BY id ASC");
-$stmt->execute();
-$taxClasses = $stmt;
+$fuelTypes = $model->getFuelTypes();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Taxation Class – Vehicle Fleet Manager</title>
+    <title>Add Fuel Type – Vehicle Fleet Manager</title>
     <link href="../dist/css/modern.css" rel="stylesheet">
     <style>
-        body { background: #f0f2f5; font-family: 'Segoe UI', Arial, sans-serif; }
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
 
         .page-wrapper {
             min-height: 100vh;
@@ -70,7 +71,7 @@ $taxClasses = $stmt;
             text-transform: uppercase;
         }
 
-        .header-icon {
+        .page-header .header-icon {
             width: 36px;
             height: 36px;
             background: rgba(255,255,255,0.18);
@@ -78,11 +79,16 @@ $taxClasses = $stmt;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #fff;
             font-size: 1.1rem;
         }
 
-        .page-body { display: flex; }
+        .page-body {
+            display: flex;
+            gap: 0;
+        }
 
+        /* ── LEFT: Form panel ── */
         .form-panel {
             width: 300px;
             flex-shrink: 0;
@@ -120,7 +126,10 @@ $taxClasses = $stmt;
             box-shadow: 0 0 0 3px rgba(46,109,164,0.12);
         }
 
-        .btn-row { display: flex; gap: 10px; }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
 
         .btn-clear {
             flex: 1;
@@ -134,6 +143,7 @@ $taxClasses = $stmt;
             cursor: pointer;
             transition: background .15s;
         }
+
         .btn-clear:hover { background: #f1f3f5; }
 
         .btn-add {
@@ -148,6 +158,7 @@ $taxClasses = $stmt;
             cursor: pointer;
             transition: opacity .15s;
         }
+
         .btn-add:hover { opacity: .88; }
 
         .alert {
@@ -157,10 +168,15 @@ $taxClasses = $stmt;
             font-size: 0.84rem;
             font-weight: 500;
         }
+
         .alert-success { background: #d1fae5; color: #065f46; }
         .alert-danger  { background: #fee2e2; color: #991b1b; }
 
-        .table-panel { flex: 1; padding: 32px 28px; }
+        /* ── RIGHT: Table panel ── */
+        .table-panel {
+            flex: 1;
+            padding: 32px 28px;
+        }
 
         .table-panel h6 {
             font-size: 0.78rem;
@@ -171,9 +187,16 @@ $taxClasses = $stmt;
             margin-bottom: 14px;
         }
 
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table thead tr { background: #1a3c6e; }
-        .data-table thead th {
+        .fuel-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .fuel-table thead tr {
+            background: #1a3c6e;
+        }
+
+        .fuel-table thead th {
             color: #fff;
             font-size: 0.8rem;
             font-weight: 600;
@@ -183,13 +206,20 @@ $taxClasses = $stmt;
             text-align: left;
         }
 
-        .data-table tbody tr {
+        .fuel-table tbody tr {
             border-bottom: 1px solid #f0f2f5;
             transition: background .12s;
         }
-        .data-table tbody tr:hover { background: #f8f9fa; }
-        .data-table tbody tr:last-child { border-bottom: none; }
-        .data-table tbody td { padding: 11px 16px; font-size: 0.9rem; color: #212529; }
+
+        .fuel-table tbody tr:hover { background: #f8f9fa; }
+
+        .fuel-table tbody td {
+            padding: 11px 16px;
+            font-size: 0.9rem;
+            color: #212529;
+        }
+
+        .fuel-table tbody tr:last-child { border-bottom: none; }
 
         .badge-id {
             display: inline-block;
@@ -202,39 +232,51 @@ $taxClasses = $stmt;
             margin-right: 8px;
         }
 
-        .empty-msg { text-align: center; color: #adb5bd; font-size: 0.88rem; padding: 24px 0; }
+        .empty-msg {
+            text-align: center;
+            color: #adb5bd;
+            font-size: 0.88rem;
+            padding: 24px 0;
+        }
 
-        .record-count { margin-top: 12px; font-size: 0.78rem; color: #adb5bd; text-align: right; }
-
-        .table-scroll { max-height: 420px; overflow-y: auto; }
-        .table-scroll::-webkit-scrollbar { width: 5px; }
-        .table-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .table-scroll::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 4px; }
+        .record-count {
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: #adb5bd;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
+
 <div class="page-wrapper">
     <div class="page-card">
 
+        <!-- Header -->
         <div class="page-header">
-            <div class="header-icon">💰</div>
-            <h4>Add Taxation Class</h4>
+            <div class="header-icon">⛽</div>
+            <h4>Add Fuel Type</h4>
         </div>
 
         <div class="page-body">
 
+            <!-- Form Panel -->
             <div class="form-panel">
-                <form method="POST">
-                    <label for="description">Taxation Class</label>
+                <form method="POST" id="fuelForm">
+                    <label for="description">Fuel Type</label>
                     <input type="text"
                            id="description"
                            name="description"
-                           placeholder="e.g. CLASS A"
+                           placeholder="e.g. PETROL"
                            autocomplete="off">
+
                     <div class="btn-row">
-                        <button type="button" class="btn-clear"
-                                onclick="document.getElementById('description').value=''">Clear</button>
-                        <button type="submit" name="add_tax" class="btn-add">Add</button>
+                        <button type="button" class="btn-clear" onclick="document.getElementById('description').value=''">
+                            Clear
+                        </button>
+                        <button type="submit" name="add_fuel_type" class="btn-add">
+                            Add
+                        </button>
                     </div>
                 </form>
 
@@ -246,32 +288,35 @@ $taxClasses = $stmt;
                 <?php endif; ?>
             </div>
 
+            <!-- Table Panel -->
             <div class="table-panel">
-                <h6>Existing Taxation Classes</h6>
-                <div class="table-scroll">
-                    <table class="data-table">
-                        <thead>
-                            <tr><th>Taxation Class</th></tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $count = 0;
-                            while ($row = $taxClasses->fetch(PDO::FETCH_ASSOC)):
-                                $count++;
-                            ?>
-                            <tr>
-                                <td>
-                                    <span class="badge-id"><?php echo $row['id']; ?></span>
-                                    <?php echo htmlspecialchars($row['description']); ?>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                            <?php if ($count === 0): ?>
-                            <tr><td class="empty-msg">No taxation classes found.</td></tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
+                <h6>Existing Fuel Types</h6>
+                <table class="fuel-table">
+                    <thead>
+                        <tr>
+                            <th>Fuel Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $count = 0;
+                        while ($row = $fuelTypes->fetch(PDO::FETCH_ASSOC)):
+                            $count++;
+                        ?>
+                        <tr>
+                            <td>
+                                <span class="badge-id"><?php echo $row['id']; ?></span>
+                                <?php echo htmlspecialchars($row['description']); ?>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                        <?php if ($count === 0): ?>
+                        <tr>
+                            <td class="empty-msg">No fuel types found.</td>
+                        </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
                 <?php if ($count > 0): ?>
                     <div class="record-count"><?php echo $count; ?> record<?php echo $count !== 1 ? 's' : ''; ?></div>
                 <?php endif; ?>
@@ -280,5 +325,6 @@ $taxClasses = $stmt;
         </div>
     </div>
 </div>
+
 </body>
 </html>

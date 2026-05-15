@@ -68,7 +68,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
             
                 <li class="sidebar-item">
-                    <a href="approve.php"
+                    <a href="assignvehicle.php"
                        class="sidebar-link"
                        onclick="highlightSection(this)">
                        Assign Vehicle
@@ -76,7 +76,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 </li>
            
                 <li class="sidebar-item">
-                    <a href="access.php"
+                    <a href="vehiclelicence.php"
                        class="sidebar-link"
                        onclick="highlightSection(this)">
                         Vehicle Licence
@@ -134,15 +134,15 @@ if (session_status() === PHP_SESSION_NONE) {
                 </a>
 
                  <ul class="sub-menu-right">
-                        <li><a href="/AMS/Views/addvehicle.php">Vehicle class</a></li>
-                        <li><a href="/AMS/Views/addtax.php">Taxation class</a></li>
-                        <li><a href="/AMS/Views/addstatus.php">status</a></li>
-                        <li><a href="#">Fuel Type</a></li>
-                        <li><a href="#">Make</a></li>
-                        <li><a href="#">Model</a></li>
-                        <li><a href="#">Country</a></li>
-                        <li><a href="#">Colour</a></li>
-                        <li><a href="#">Provincial Counsil</a></li>
+                        <li><a href="Views/addvehicle.php">Vehicle class</a></li>
+                        <li><a href="Views/addtax.php">Taxation class</a></li>
+                        <li><a href="Views/addstatus.php">status</a></li>
+                        <li><a href="Views/addfueltype.php">Fuel Type</a></li>
+                        <li><a href="Views/addmake.php">Make</a></li>
+                        <li><a href="Views/addmodel.php">Model</a></li>
+                        <li><a href="Views/addcountry.php">Country</a></li>
+                        <li><a href="Views/addcolour.php">Colour</a></li>
+                        <li><a href="Views/addprovincialcouncil.php">Provincial Council</a></li>
                     </ul>
 
             </li>

@@ -1,20 +1,56 @@
 <?php
-session_start();
 include 'includes/header.php';
 include 'includes/leftnav.php';
 include 'database/db.php';
 include 'Model/VehicleModel.php';
 include 'Model/StatusModel.php';
+include 'Model/FuelTypeModel.php';
+include 'Model/MakeModel.php';
+include 'Model/ModelModel.php';
+include 'Model/CountryModel.php';
+include 'Model/ColourModel.php';
+include 'Model/ProvincialCouncilModel.php';
 
-// Fetch saved data
 $database = new Database();
 $db = $database->connect();
 
-$vehicleModel = new VehicleModel($db);
+// Vehicle classes
+$vehicleModel   = new VehicleModel($db);
 $vehicleClasses = $vehicleModel->getVehicles();
 
-$statusModel = new StatusModel($db);
+// Vehicle statuses
+$statusModel    = new StatusModel($db);
 $vehicleStatuses = $statusModel->getStatuses();
+
+// Taxation classes
+$taxStmt = $db->prepare("SELECT id, description FROM TAXATION_CLASS ORDER BY description ASC");
+$taxStmt->execute();
+$taxClasses = $taxStmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fuel types
+$fuelModel  = new FuelTypeModel($db);
+$fuelTypes  = $fuelModel->getFuelTypes()->fetchAll(PDO::FETCH_ASSOC);
+
+// Makes
+$makeModel  = new MakeModel($db);
+$makes      = $makeModel->getMakes()->fetchAll(PDO::FETCH_ASSOC);
+
+// Countries
+$countryModel = new CountryModel($db);
+$countries    = $countryModel->getCountries()->fetchAll(PDO::FETCH_ASSOC);
+
+// Colours
+$colourModel  = new ColourModel($db);
+$colours      = $colourModel->getColours()->fetchAll(PDO::FETCH_ASSOC);
+
+// Provincial councils
+$councilModel   = new ProvincialCouncilModel($db);
+$councils       = $councilModel->getProvincialCouncils()->fetchAll(PDO::FETCH_ASSOC);
+
+// All models (for client-side filtering by make)
+$allModelsStmt = $db->prepare("SELECT id, makeid, description FROM MODEL ORDER BY description ASC");
+$allModelsStmt->execute();
+$allModelsJson = json_encode($allModelsStmt->fetchAll(PDO::FETCH_ASSOC));
 ?>
 
 <main class="content" style="padding-top: 80px;">
@@ -95,6 +131,9 @@ $vehicleStatuses = $statusModel->getStatuses();
                                 <label class="form-label">Taxation Class</label>
                                 <select class="form-select form-select-sm" name="taxclass">
                                     <option value="">--Select--</option>
+                                    <?php foreach($taxClasses as $row): ?>
+                                        <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['description']); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
 
@@ -120,6 +159,9 @@ $vehicleStatuses = $statusModel->getStatuses();
                                 <label class="form-label">Fuel Type</label>
                                 <select class="form-select form-select-sm" name="fueltype">
                                     <option value="">--Select--</option>
+                                    <?php foreach($fuelTypes as $row): ?>
+                                        <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['description']); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
 
@@ -129,8 +171,11 @@ $vehicleStatuses = $statusModel->getStatuses();
 
                             <div class="col-md-6">
                                 <label class="form-label">Make</label>
-                                <select class="form-select form-select-sm" name="make">
+                                <select class="form-select form-select-sm" name="make" id="makeSelect" onchange="loadModels(this.value)">
                                     <option value="">--Select--</option>
+                                    <?php foreach($makes as $row): ?>
+                                        <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['description']); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
 
@@ -138,6 +183,9 @@ $vehicleStatuses = $statusModel->getStatuses();
                                 <label class="form-label">Country</label>
                                 <select class="form-select form-select-sm" name="country">
                                     <option value="">--Select--</option>
+                                    <?php foreach($countries as $row): ?>
+                                        <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['description']); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
 
@@ -147,8 +195,8 @@ $vehicleStatuses = $statusModel->getStatuses();
 
                             <div class="col-md-6">
                                 <label class="form-label">Model</label>
-                                <select class="form-select form-select-sm" name="model">
-                                    <option value="">--Select--</option>
+                                <select class="form-select form-select-sm" name="model" id="modelSelect">
+                                    <option value="">--Select Make first--</option>
                                 </select>
                             </div>
 
@@ -203,6 +251,9 @@ $vehicleStatuses = $statusModel->getStatuses();
                                 <label class="form-label">Color</label>
                                 <select class="form-select form-select-sm" name="colour">
                                     <option value="">--Select--</option>
+                                    <?php foreach($colours as $row): ?>
+                                        <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['description']); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
 
@@ -256,8 +307,11 @@ $vehicleStatuses = $statusModel->getStatuses();
 
                             <div class="col-md-6">
                                 <label class="form-label">Provincial Council</label>
-                                <select class="form-select form-select-sm">
+                                <select class="form-select form-select-sm" name="provincialcouncil">
                                     <option value="">--Select--</option>
+                                    <?php foreach($councils as $row): ?>
+                                        <option value="<?php echo $row['id']; ?>"><?php echo htmlspecialchars($row['description']); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
 
@@ -341,6 +395,21 @@ $vehicleStatuses = $statusModel->getStatuses();
 </main>
 
 <script>
+var ALL_MODELS = <?php echo $allModelsJson; ?>;
+
+function loadModels(makeId) {
+    var modelSelect = document.getElementById('modelSelect');
+    modelSelect.innerHTML = '<option value="">--Select--</option>';
+    if (!makeId) return;
+    ALL_MODELS.forEach(function (m) {
+        if (String(m.makeid) === String(makeId)) {
+            var opt = document.createElement('option');
+            opt.value = m.id;
+            opt.text  = m.description;
+            modelSelect.add(opt);
+        }
+    });
+}
 
 function previewCertificate(event)
 {

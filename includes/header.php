@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<?
-session_start();
-
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
     
 <head>
@@ -44,12 +45,6 @@ session_start();
 
 	<!-- BEGIN SETTINGS -->
 	<!-- You can remove this after picking a style -->
-	<style>
-		body {
-			opacity: 0;
-		}
-	</style>
-
 	<!-- END SETTINGS -->
 </head>
 <!-- SET YOUR THEME -->

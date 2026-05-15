@@ -1,34 +1,25 @@
 <?php
 
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
 class Database {
 
     private $host = "localhost";
-    private $db_name = "vehicle_management";
-    private $username = "root";
+    private $user = "root";
     private $password = "";
-
-    public $conn;
+    private $database = "vehicle_management_system";
+    private $conn;
 
     public function connect() {
-
         $this->conn = null;
-
         try {
-
-            $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->db_name,
-                $this->username,
-                $this->password
-            );
-
+            $dsn = "mysql:unix_socket=/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock;dbname={$this->database};charset=utf8";
+            $this->conn = new PDO($dsn, $this->user, $this->password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        } catch(PDOException $e) {
-
-            echo "Connection Error: " . $e->getMessage();
+        } catch (PDOException $e) {
+            die("Connection failed: " . $e->getMessage());
         }
-
         return $this->conn;
     }
 }
-?>
