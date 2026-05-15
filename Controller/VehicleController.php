@@ -1,6 +1,7 @@
 <?php
-require_once __DIR__ . '/../database/db.php';
-require_once __DIR__ . '/../model/VehicleModel.php';
+require_once "../database/db.php";
+
+require_once "../Model/VehicleModel.php";
 
 class VehicleController {
 
@@ -19,13 +20,15 @@ class VehicleController {
 
         if(isset($_POST['add_vehicle'])) {
 
-            $class_name = trim($_POST['class_name']);
+            $description = trim($_POST['description']);
 
-            if(!empty($class_name)) {
+            if(!empty($description)) {
 
-                $this->model->addVehicle($class_name);
+                $this->model->addVehicle($description);
 
-                header("Location: index.php");
+                // Reload page to show updated list
+                header("Location: " . $_SERVER['PHP_SELF']);
+                exit();
             }
         }
     }

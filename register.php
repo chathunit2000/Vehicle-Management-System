@@ -2,6 +2,19 @@
 session_start();
 include 'includes/header.php';
 include 'includes/leftnav.php';
+include 'database/db.php';
+include 'Model/VehicleModel.php';
+include 'Model/StatusModel.php';
+
+// Fetch saved data
+$database = new Database();
+$db = $database->connect();
+
+$vehicleModel = new VehicleModel($db);
+$vehicleClasses = $vehicleModel->getVehicles();
+
+$statusModel = new StatusModel($db);
+$vehicleStatuses = $statusModel->getStatuses();
 ?>
 
 <main class="content" style="padding-top: 80px;">
@@ -68,6 +81,13 @@ include 'includes/leftnav.php';
                                 <label class="form-label">Class of Vehicle</label>
                                 <select class="form-select form-select-sm" name="vehicleclass">
                                     <option value="">--Select--</option>
+                                    <?php
+                                    if($vehicleClasses && $vehicleClasses->rowCount() > 0) {
+                                        while($row = $vehicleClasses->fetch(PDO::FETCH_ASSOC)) {
+                                            echo "<option value='" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['description']) . "</option>";
+                                        }
+                                    }
+                                    ?>
                                 </select>
                             </div>
 
@@ -86,6 +106,13 @@ include 'includes/leftnav.php';
                                 <label class="form-label">Vehicle Status</label>
                                 <select class="form-select form-select-sm" name="vehiclestatus">
                                     <option value="">--Select--</option>
+                                    <?php
+                                    if($vehicleStatuses && $vehicleStatuses->rowCount() > 0) {
+                                        while($row = $vehicleStatuses->fetch(PDO::FETCH_ASSOC)) {
+                                            echo "<option value='" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['description']) . "</option>";
+                                        }
+                                    }
+                                    ?>
                                 </select>
                             </div>
 

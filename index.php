@@ -47,12 +47,10 @@ $_SESSION["designation"] = "HOD";
 $_SESSION["divId"] = 6;
 $_SESSION["TYPE"] = "HOD";    
 header("Location: home.php");
-exit();
 
 
 
-
-require_once __DIR__ . '/Controller/VehicleController.php';
+require_once "Controller/VehicleController.php";
 $controller = new VehicleController();
 
 /* Add Vehicle */
@@ -62,7 +60,9 @@ $controller->addVehicle();
 $vehicles = $controller->getVehicles();
 
 /* Load View */
-require_once __DIR__ . '/Views/addvehicle.php';
+require_once "Views/addvehicle.php";
+require_once "Views/addtax.php";
+
 
 ?>
 

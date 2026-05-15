@@ -12,14 +12,14 @@ class VehicleModel {
     }
 
     // Insert Vehicle Class
-    public function addVehicle($class_name) {
+    public function addVehicle($description) {
 
-        $query = "INSERT INTO " . $this->table . " (class_name)
-                  VALUES (:class_name)";
+       $query = "INSERT INTO vehicle_class(description)
+              VALUES(:description)";
 
         $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(":class_name", $class_name);
+        $stmt->bindParam(":description", $description);
 
         return $stmt->execute();
     }

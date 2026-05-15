@@ -1,19 +1,32 @@
 <?php
-// Include and instantiate the Vehicle Controller
-require_once '../Controller/VehicleController.php';
 
-$controller = new VehicleController();
+include '../database/db.php';
+include '../Model/StatusModel.php';
 
-// Handle form submission
-$controller->addVehicle();
+$database = new Database();
+$conn = $database->connect();
+$statusModel = new StatusModel($conn);
 
-// Get all vehicles
-$vehicles = $controller->getVehicles();
+/* INSERT DATA */
+
+if(isset($_POST['add_vehicle'])){
+    $description = trim($_POST['description']);
+
+    if(!empty($description)){
+        $statusModel->addStatus($description);
+    }
+}
+
+/* FETCH DATA */
+
+$vehicles = $statusModel->getStatuses();
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
+
     <title>Vehicle Fleet Manager</title>
 
     <style>
@@ -71,59 +84,68 @@ $vehicles = $controller->getVehicles();
         }
 
     </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
+    <!-- FORM -->
+
     <div class="form-box">
 
-        <h2>Add Class of Vehicle</h2>
+        <h2>Add Vehicle Status</h2>
 
         <form method="POST">
 
-            <label>Class of Vehicle</label>
+            <label>Vehicle Status</label>
 
-            <input type="text" name="description" required>
+            <input type="text"
+                   name="description"
+                   required>
 
-            <button type="submit" name="add_vehicle">
+            <button type="submit"
+                    name="add_vehicle">
+
                 Add
+
             </button>
 
         </form>
 
     </div>
 
+    <!-- TABLE -->
+
     <div class="list-box">
 
         <table>
 
             <tr>
-                <th>Vehicle Class</th>
+                <th>Vehicle Status</th>
             </tr>
-            
 
-           <?php 
-           if($vehicles != null):
-           
-           ?>
+            <?php if($vehicles): ?>
 
-    <?php while($row = $vehicles->fetch(PDO::FETCH_ASSOC)): ?>
+                <?php while($row = $vehicles->fetch(PDO::FETCH_ASSOC)): ?>
 
-        <tr>
-            <td><?php echo htmlspecialchars($row['description']); ?></td>
-        </tr>
+                    <tr>
+                        <td>
+                            <?php echo $row['description']; ?>
+                        </td>
+                    </tr>
 
-    <?php endwhile; ?>
+                <?php endwhile; ?>
 
-<?php else: ?>
+            <?php else: ?>
 
-    <tr>
-        <td>No vehicles found</td>
-    </tr>
+                <tr>
+                    <td>No records found</td>
+                </tr>
 
-<?php endif; ?>
+            <?php endif; ?>
+
         </table>
 
     </div>

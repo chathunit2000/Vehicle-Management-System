@@ -1,6 +1,6 @@
 <?php
 
- //Database information
+ /*//Database information
         $host = "192.168.1.63";
         $username = "logdb_user";
         $password = '$$HilF50r';
@@ -20,5 +20,22 @@
           error_log($e->getMessage());
           exit('Error connecting to database'); //Should be a message a typical user could understand
         }
+*/
 
+
+
+require_once "database/db.php";
+
+$db = new Database();
+
+$conn = $db->connect();
+
+if($conn){
+
+    echo "Database Connected Successfully";
+
+}else{
+
+    echo "Connection Failed";
+}
 ?>

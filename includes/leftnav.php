@@ -13,10 +13,11 @@ if (session_status() === PHP_SESSION_NONE) {
     <nav id="sidebar" class="sidebar">
         <a href="dashboard-analytics.php" class="sidebar-brand">
     <svg>
-        <use xlink:href="#ion-ios-pulse-strong"></use>
-    </svg>
-  Vehicle Management System
+       <use xlink:href="#car-outline"></use>    </svg>
+         Vehicle Management System
 </a>
+
+
 
         <div class="sidebar-content">
             <div class="sidebar-user">
@@ -33,7 +34,7 @@ if (session_status() === PHP_SESSION_NONE) {
               echo "Division: ". $_SESSION["DIVISION"]."<br>"; 
               echo "Role: ". $_SESSION["TYPE"]."<br>"; 
               echo "Role: ". $_SESSION["divId"]."<br>"; 
-                    ?>
+                    ?> 
 </div>
 
             </div>
@@ -134,8 +135,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
                  <ul class="sub-menu-right">
                         <li><a href="/AMS/Views/addvehicle.php">Vehicle class</a></li>
-                        <li><a href="#">Taxation class</a></li>
-                        <li><a href="#">status</a></li>
+                        <li><a href="/AMS/Views/addtax.php">Taxation class</a></li>
+                        <li><a href="/AMS/Views/addstatus.php">status</a></li>
                         <li><a href="#">Fuel Type</a></li>
                         <li><a href="#">Make</a></li>
                         <li><a href="#">Model</a></li>
